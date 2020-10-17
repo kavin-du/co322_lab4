@@ -122,18 +122,55 @@ void printNode(struct TrieNode* node, char* restOfWord, int pos){
 		} 
 	}
 }
+
+void readFile(char* path, char** array){
+	FILE* file;
+	char word[50];
+
+	file = fopen(path, "r");
+	if(file == NULL) {
+		printf("Error reading the file. Check if the path is correct.\n");
+		return;
+	}
+	int i=0;
+	while(fgets(word, 50, file) != NULL){
+		strcpy(array[i], word);
+		i++;
+		//printf("%s", word);
+	}
+	fclose(file);
+}
+
 int main(){
 	
 	struct TrieNode* head = createNode();
 
-	char words[][10] = {"hello", "who", "are", "helloww", "you"};
+	//char words[][10] = {"hello", "who", "are", "helloww", "you"};
 
-	for(int i=0; i<5; i++){
+	/*for(int i=0; i<5; i++){
 		insertWord(head, words[i]);
-	}
+	}*/
 
 	//printf("%s\n", searchWord(head, "hwll") ? "found" : "not found");
 	//char empty[CHAR_SET] = "";
 	// printNode(head, empty, 0);
-	printSuggestions(head, "hellowww");
+
+	int numOfWords = 2; 
+	int sizeOfSingleWord = 50;
+
+	char** wordList = malloc(numOfWords*sizeof(char*));
+	for(int i=0; i<numOfWords; i++){
+		wordList[i] = malloc(sizeOfSingleWord*sizeof(char));
+	}
+
+	// char* filePath = "./wordlist/wordlist1000.txt"; // this path not work in windows
+	char* filePath = "./wordlist/test.txt"; // this path not work in windows
+	readFile(filePath, wordList);
+
+	for(int i=0; i<numOfWords; i++){
+		insertWord(head, wordList[i]);
+		//printf("%s", wordList[i]);
+	}
+
+	printSuggestions(head, "yo");
 }
