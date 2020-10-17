@@ -1,13 +1,22 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
-int main(int argc, char const *argv[]){
-    char* restOfWord = "";
-    char c = 'r';
+void toLowerCase(char* word){
+    for(int i=0; word[i] != '\0'; i++){
+        word[i] = tolower(word[i]);
+    }
+}
 
-    strncat(&restOfWord, &c, 1);
+int main(){
+    char* w = "FuckYou"; // fuck you this is read only fucker
+    // char w[20] = "FuckYou";
+    char temp[50];
+    strcpy(temp, w);
 
-    printf("%s\n", restOfWord);
+    toLowerCase(temp);
+    
+    printf("%s\n", temp);
 
     return 0;
 }

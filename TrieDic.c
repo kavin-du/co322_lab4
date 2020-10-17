@@ -1,12 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> // for strcat()
+#include <ctype.h> // for tolowercase()
 
 // size of the alphabet
-#define CHAR_SET 26
+#define CHAR_SET 27  // ??????????????? // there is an apostrophe
+#define SIZE_OF_SINGLE_WORD 25
+#define WORDS_IN_FILE 1000
 
 
-struct TrieNode{
+struct TrieNode{  // change structure according to the assignment
 	char data;
 	int isWord; // this is is leaf, check if can reduce for loops
 	struct TrieNode* character[CHAR_SET];
@@ -33,7 +36,7 @@ void insertWord(struct TrieNode* head, char* word){
 	while(*word){
 		if(traveler->character[*word -'a'] == NULL){
 			traveler->character[*word -'a'] = createNode();
-			traveler->character[*word -'a']->data = *word;
+			//traveler->character[*word -'a']->data = *word;
 		}
 		
 		// move to next node
@@ -63,8 +66,8 @@ int searchWord(struct TrieNode* head, char* word){
 	return traverler->isWord;
 }
 
-
-void printSuggestions(struct TrieNode* head,char* wordPart){
+// return type differnt in the assignment
+void printSuggestions(struct TrieNode* head, char* wordPart){
 	
 	if(head == NULL) {
 		printf("Head pointer is null, no words found");
@@ -107,8 +110,10 @@ void printSuggestions(struct TrieNode* head,char* wordPart){
 }
 
 void printNode(struct TrieNode* node, char* restOfWord, int pos){
-
+	if(node == NULL) return;
 	if(node->isWord){
+		// restOfWord[pos] = '\0';
+		// printf("%s", restOfWord);
 		for(int i=0; i<pos; i++){
 			printf("%c", restOfWord[i]);
 		}
@@ -125,7 +130,7 @@ void printNode(struct TrieNode* node, char* restOfWord, int pos){
 
 void readFile(char* path, char** array){
 	FILE* file;
-	char word[50];
+	char word[SIZE_OF_SINGLE_WORD];
 
 	file = fopen(path, "r");
 	if(file == NULL) {
@@ -133,44 +138,60 @@ void readFile(char* path, char** array){
 		return;
 	}
 	int i=0;
-	while(fgets(word, 50, file) != NULL){
-		strcpy(array[i], word);
+	while(fgets(word, SIZE_OF_SINGLE_WORD, file) != NULL){
+		char* token;
+		token = strtok(word, "\n");
+		char temp[SIZE_OF_SINGLE_WORD];
+		strcpy(temp, token);
+		toLowerCase(temp);
+		strcpy(array[i], temp); // removing new line character
 		i++;
+		// if(i==WORDS_IN_FILE) break;
 		//printf("%s", word);
 	}
 	fclose(file);
 }
 
+void toLowerCase(char* word){
+    for(int i=0; word[i] != '\0'; i++){
+        word[i] = tolower(word[i]);
+    }
+}
+
 int main(){
 	
 	struct TrieNode* head = createNode();
+	/*
+	char words[][10] = {"hello", "who", "are", "helloww", "you"};
 
-	//char words[][10] = {"hello", "who", "are", "helloww", "you"};
-
-	/*for(int i=0; i<5; i++){
+	for(int i=0; i<5; i++){
 		insertWord(head, words[i]);
 	}*/
 
 	//printf("%s\n", searchWord(head, "hwll") ? "found" : "not found");
-	//char empty[CHAR_SET] = "";
-	// printNode(head, empty, 0);
+	
 
-	int numOfWords = 2; 
-	int sizeOfSingleWord = 50;
 
-	char** wordList = malloc(numOfWords*sizeof(char*));
-	for(int i=0; i<numOfWords; i++){
-		wordList[i] = malloc(sizeOfSingleWord*sizeof(char));
+	int numOfWords = WORDS_IN_FILE; 
+
+	char** wordList = malloc(2*numOfWords*sizeof(char*));
+	for(int i=0; i<2*numOfWords; i++){
+		wordList[i] = malloc(SIZE_OF_SINGLE_WORD*sizeof(char));
 	}
 
-	// char* filePath = "./wordlist/wordlist1000.txt"; // this path not work in windows
-	char* filePath = "./wordlist/test.txt"; // this path not work in windows
+	char* filePath = "./wordlist/wordlist1000.txt"; // this path not work in windows
+	// char* filePath = "./wordlist/wordlist500.txt";
+	// char* filePath = "./wordlist/test.txt"; // this path not work in windows
 	readFile(filePath, wordList);
 
 	for(int i=0; i<numOfWords; i++){
 		insertWord(head, wordList[i]);
-		//printf("%s", wordList[i]);
+		// printf("%s\n", wordList[i]);
 	}
+	char empty[100];
+	printNode(head, empty, 0);
 
-	printSuggestions(head, "yo");
+	// char* w = "be";
+	// printf("%s\n", searchWord(head, w) ? "found" : "not found");
+	// printSuggestions(head, w);
 }
