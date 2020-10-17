@@ -5,20 +5,20 @@
 
 // size of the alphabet
 #define CHAR_SET 27  // ??????????????? // there is an apostrophe
-#define SIZE_OF_SINGLE_WORD 25
-#define WORDS_IN_FILE 1000
+#define SIZE_OF_SINGLE_WORD 25 // 25
+#define WORDS_IN_FILE 10000
 
 
-struct TrieNode{  // change structure according to the assignment
-	char data;
+typedef struct trienode{  // change structure according to the assignment
+	//char data;
 	int isWord; // this is is leaf, check if can reduce for loops
-	struct TrieNode* character[CHAR_SET];
-};
+	struct trienode* character[CHAR_SET];
+}TrieNode;
 
 // 
-struct TrieNode* createNode(){
+TrieNode* createNode(){
 	// allocating memory for new node
-	struct TrieNode* newNode = (struct TrieNode*)malloc(sizeof(struct TrieNode));
+	TrieNode* newNode = (TrieNode*)malloc(sizeof(TrieNode));
 	
 	// making all children null
 	for(int i=0; i<CHAR_SET; i++){
@@ -31,8 +31,8 @@ struct TrieNode* createNode(){
 	return newNode;
 }
 
-void insertWord(struct TrieNode* head, char* word){
-	struct TrieNode* traveler = head;
+void insertWord(TrieNode* head, char* word){
+	TrieNode* traveler = head;
 	while(*word){
 		if(traveler->character[*word -'a'] == NULL){
 			traveler->character[*word -'a'] = createNode();
@@ -50,10 +50,10 @@ void insertWord(struct TrieNode* head, char* word){
 }
 
 // not need, not necessasy but good to have
-int searchWord(struct TrieNode* head, char* word){
+int searchWord(TrieNode* head, char* word){
 	if(head == NULL) return 0;
 
-	struct TrieNode* traverler = head;
+	TrieNode* traverler = head;
 
 	while(*word){
 
@@ -67,13 +67,13 @@ int searchWord(struct TrieNode* head, char* word){
 }
 
 // return type differnt in the assignment
-void printSuggestions(struct TrieNode* head, char* wordPart){
+void printSuggestions(TrieNode* head, char* wordPart){
 	
 	if(head == NULL) {
 		printf("Head pointer is null, no words found");
 	}
 	
-	struct TrieNode* traveler = head;
+	TrieNode* traveler = head;
 
 	char* originalWord = wordPart; // because travel changes
 
@@ -109,7 +109,7 @@ void printSuggestions(struct TrieNode* head, char* wordPart){
 	
 }
 
-void printNode(struct TrieNode* node, char* restOfWord, int pos){
+void printNode(TrieNode* node, char* restOfWord, int pos){
 	if(node == NULL) return;
 	if(node->isWord){
 		// restOfWord[pos] = '\0';
@@ -160,7 +160,7 @@ void toLowerCase(char* word){
 
 int main(){
 	
-	struct TrieNode* head = createNode();
+	TrieNode* head = createNode();
 	/*
 	char words[][10] = {"hello", "who", "are", "helloww", "you"};
 
@@ -179,7 +179,7 @@ int main(){
 		wordList[i] = malloc(SIZE_OF_SINGLE_WORD*sizeof(char));
 	}
 
-	char* filePath = "./wordlist/wordlist1000.txt"; // this path not work in windows
+	char* filePath = "./wordlist/wordlist10000.txt"; // this path not work in windows
 	// char* filePath = "./wordlist/wordlist500.txt";
 	// char* filePath = "./wordlist/test.txt"; // this path not work in windows
 	readFile(filePath, wordList);
@@ -188,10 +188,10 @@ int main(){
 		insertWord(head, wordList[i]);
 		// printf("%s\n", wordList[i]);
 	}
-	char empty[100];
-	printNode(head, empty, 0);
+	// char empty[100];
+	// printNode(head, empty, 0);
 
-	// char* w = "be";
+	char* w = "be"; // need lowercase? 
 	// printf("%s\n", searchWord(head, w) ? "found" : "not found");
-	// printSuggestions(head, w);
+	printSuggestions(head, w);
 }
