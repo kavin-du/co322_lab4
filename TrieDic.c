@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h> // for strcat()
 
 // size of the alphabet
 #define CHAR_SET 26
@@ -7,9 +8,8 @@
 
 struct TrieNode{
 	char data;
-	int isWord;
+	int isWord; // this is is leaf, check if can reduce for loops
 	struct TrieNode* character[CHAR_SET];
-	
 };
 
 // 
@@ -46,6 +46,7 @@ void insertWord(struct TrieNode* head, char* word){
 	traveler->isWord = 1;
 }
 
+// not need, not necessasy but good to have
 int searchWord(struct TrieNode* head, char* word){
 	if(head == NULL) return 0;
 
@@ -75,9 +76,8 @@ void printSuggestions(struct TrieNode* head,char* wordPart){
 
 	while(*wordPart){
 		if(traveler->character[*wordPart-'a'] == NULL){
-			printf("No words found!!");
+			printf("No words found!!\n");
 			return;
-			//break; // no break after return
 		}
 		
 		// move to next node
@@ -94,21 +94,32 @@ void printSuggestions(struct TrieNode* head,char* wordPart){
 			break;
 		}
 	}
+
+	char empty[100];
 	if(isEmpty) printf("%s\n", originalWord);
-	else printNode(traveler);
+	else{
+		strcpy(empty, originalWord);
+		int stringlength = strlen(empty);
+		//printf("%s ----- length=%d\n", empty, stringlength);
+		printNode(traveler, empty, stringlength);
+	} 
 	
 }
 
-void printNode(struct TrieNode* node){
-	if(node == NULL){ // skip empty nodes
-		return;
-	}
-	printf("%c", node -> data);
+void printNode(struct TrieNode* node, char* restOfWord, int pos){
 
-	if(node->isWord) printf("\n");
-	
+	if(node->isWord){
+		for(int i=0; i<pos; i++){
+			printf("%c", restOfWord[i]);
+		}
+		printf("\n");
+	}
+
 	for(int i=0; i<CHAR_SET; i++){
-		printNode(node -> character[i]);
+		if(node->character[i] != NULL){
+			restOfWord[pos] = i+'a';
+			printNode(node -> character[i], restOfWord, pos+1);
+		} 
 	}
 }
 int main(){
@@ -122,7 +133,7 @@ int main(){
 	}
 
 	//printf("%s\n", searchWord(head, "hwll") ? "found" : "not found");
-	
-	printNode(head);
-	//printSuggestions(head, "hell");
+	//char empty[CHAR_SET] = "";
+	// printNode(head, empty, 0);
+	printSuggestions(head, "hellowww");
 }
