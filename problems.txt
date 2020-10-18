@@ -1,0 +1,3 @@
+what about case sensitivity when searching, if capital letters allowed alphabet size 
+undetermined, (Not double, becase ascii gaps between capital and simpl)
+what about special  characters -- cannot determine alphabet size
