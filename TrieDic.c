@@ -3,15 +3,27 @@
 #include <string.h> // for strcat()
 #include <ctype.h> // for tolowercase()
 
-// size of the alphabet
-#define CHAR_SET 26  // there are non aphabetical characters in the text file
-#define SIZE_OF_SINGLE_WORD 35 
-#define WORDS_IN_FILE 69904 // need to change this if the file name is changed
+#define CHAR_SET 26 // size of the alphabet
+#define SIZE_OF_SINGLE_WORD 35
+#define WORDS_IN_FILE 69903 // need to change this if the file name is changed
 
+
+/**
+ * CO322 LAB 04 Part I
+ * 
+ * Trie data structure for text auto-complete
+ * 
+ * E/16/057 - Chamith UKDK
+ * 
+ * 22/10/2020
+ * 
+ * Creted and tested on a linux environment - Ubuntu 20.04
+ * 
+ */
 
 typedef struct trienode{ 
 	int isWord; // to determine if the node is endpoint of a word
-	struct trienode* character[CHAR_SET];
+	struct trienode* character[CHAR_SET]; // store the child nodes
 }TrieNode;
 
 
@@ -76,7 +88,6 @@ int searchWord(TrieNode* head, char* word){
 // priting suggestions for a given part of a word
 void printSuggestions(TrieNode* head, char* wordPart){
 	
-	// head is null when tree does not exist
 	if(head == NULL) {
 		printf("No words found....\n");
 		return;
@@ -193,16 +204,7 @@ void sanitize(char* word){
 
 int main(){
 	
-	TrieNode* head = createNode();
-	/*
-	char words[][10] = {"hello", "who", "are", "helloww", "you"};
-
-	for(int i=0; i<5; i++){
-		insertWord(head, words[i]);
-	}*/
-
-	//printf("%s\n", searchWord(head, "hwll") ? "found" : "not found");
-
+	TrieNode* head = createNode(); // creating the head node of trie
 
 	// dynamically allocated array of char pointers to store the words from file
 	char** wordList = malloc(WORDS_IN_FILE*sizeof(char*));
@@ -210,16 +212,17 @@ int main(){
 		wordList[i] = malloc(SIZE_OF_SINGLE_WORD*sizeof(char));
 	}
 
-	char* filePath = "./wordlist/wordlist70000.txt"; // this path not work in windows
-	// char* filePath = "./wordlist/test.txt"; // this path not work in windows
+	char* filePath = "./wordlist/wordlist70000.txt"; // path of the text file
+	// char* filePath = "./wordlist/wordlist10000.txt";
+	// char* filePath = "./wordlist/wordlist1000.txt";
+	
 	readFile(filePath, wordList);
 
 	for(int i=0; i<WORDS_IN_FILE; i++){
 		insertWord(head, wordList[i]); // insert words to the trie
-		// printf("%s\n", wordList[i]);
 	}
 
-	// print the whole dictionary 
+	/* print the whole dictionary, un-comment both lines */
 	// char empty[100];
 	// printNode(head, empty, 0);
 
@@ -227,11 +230,10 @@ int main(){
 
 	printf("Trie data structure.. \n");
 	printf("Enter some text to find: ");
-	scanf("%[^\n]%*c", userInput);
-	sanitize(userInput);
+	scanf("%[^\n]%*c", userInput); // getting user input
+	sanitize(userInput); // removing non-alphabetic characters
 
 	printf(":::::finding:::::\n\n");
 
-	// printf("%s\n", searchWord(head, w) ? "found" : "not found");
 	printSuggestions(head, userInput); // printing the suggestions for a given word
 }

@@ -3,16 +3,14 @@
 #include <string.h> // for strcat()
 #include <ctype.h> // for tolowercase()
 
-// size of the alphabet
-#define CHAR_SET 26  // there are non aphabetical characters in the text file
+#define CHAR_SET 26  // size of the alphabet
 #define SIZE_OF_SINGLE_WORD 35 
-#define WORDS_IN_FILE 10000 // need to change this if the file name is changed
-
+#define WORDS_IN_FILE 69903 // need to change this
 
 typedef struct trienode{ 
 	int isWord; // to determine if the node is endpoint of a word
-	struct trienode* character[CHAR_SET];
-    char label[CHAR_SET][SIZE_OF_SINGLE_WORD]; 
+	struct trienode* character[CHAR_SET]; // store the children
+    char label[CHAR_SET][SIZE_OF_SINGLE_WORD]; // store the each string in the chil
 }TrieNode;
 
 
@@ -30,7 +28,9 @@ TrieNode* createNode(){
 	
 	return newNode;
 }
-char* copyFromGivenIndex(char* word, int length, int index){ // length is optional ? remove later
+
+// function for copy a string from given index to end of string
+char* copyFromGivenIndex(char* word, int length, int index){ 
     static char newWord[SIZE_OF_SINGLE_WORD];
     int i;
     for(i=index; i<length; i++){
@@ -52,18 +52,16 @@ void insertWord(TrieNode* head, char* word){
         return;
     }
     
-	// inserting word when prefix is already there and prefix is the endof word
-	// do --> doing        done, doing --> do ????? try this also
 	char temp[SIZE_OF_SINGLE_WORD];
-	strcpy(temp, traveler -> label[*word - 'a']);
-	// printf(".........%s\n", temp);
+	strcpy(temp, traveler -> label[*word - 'a']); // copy the string in the node
+
+	// comparing how much characters equal between the given word and string in the node
 	int i=0;
 	while(temp[i] != '\0' && word[i] != '\0'){
 		if(temp[i] == word[i]) i++;
 		else break;
 	}
-	// printf(".........%d\n", i);
-	// i--;
+	
 	// word exists but not marked as a word
 	if((int)strlen(word) == (i) && (int)strlen(temp) == (i) && ((traveler -> character[*word-'a'] -> isWord)) == 0){
 		(traveler -> character[*word-'a'] -> isWord) = 1; // mark as a word
@@ -72,21 +70,23 @@ void insertWord(TrieNode* head, char* word){
 
 	// have 'do' -> insert 'doing'
 	if((int)strlen(word) > (i) && (int)strlen(temp) == (i)) {
-		char wordPart[SIZE_OF_SINGLE_WORD]; // try to reduce size
-		strcpy(wordPart, copyFromGivenIndex(word, (int)strlen(word), i));
-		// printf(".........%s\n", wordPart);
-		insertWord(traveler -> character[*word-'a'], wordPart);
+		char wordPart[SIZE_OF_SINGLE_WORD]; 
+		
+		// copy the rest of word
+		strcpy(wordPart, copyFromGivenIndex(word, (int)strlen(word), i)); 
+		insertWord(traveler -> character[*word-'a'], wordPart); // insert the rest of word
 		return; 
 	}
 
 	// have 'facebook' --> insert 'face'
-	if((int)strlen(word) == (i) && (int)strlen(temp) > (i)) { // what if marked as word?????????
+	if((int)strlen(word) == (i) && (int)strlen(temp) > (i)) { 
 		char wordPart[SIZE_OF_SINGLE_WORD];
 		strcpy(wordPart, copyFromGivenIndex(temp, (int)strlen(temp), i));
 		strcpy(traveler -> label[*word-'a'], word); // truncate the existing word
 
 		TrieNode* tempNode = traveler -> character[*word-'a'];
 
+		// moving the child nodes to new node
 		(traveler -> character[*word-'a']) = createNode();
 		traveler -> character[*word-'a'] -> isWord = 1; // mark as a word
 		traveler -> character[*word-'a'] -> character[*wordPart-'a'] = tempNode; // copy all the children
@@ -98,17 +98,18 @@ void insertWord(TrieNode* head, char* word){
 
 	// have 'there' -> insert 'this'
 	if((int)strlen(word) > (i) && (int)strlen(temp) > (i)) {
-		char commonPrefix[SIZE_OF_SINGLE_WORD];
+		char commonPrefix[SIZE_OF_SINGLE_WORD]; // to store common part for both words
 		char suffixOne[SIZE_OF_SINGLE_WORD]; // suffix of the internal node
 		char suffixTwo[SIZE_OF_SINGLE_WORD]; // suffix of inserting word
 
+		// storing the common part of both words
 		strncpy(commonPrefix, word, i);
 		commonPrefix[i] = '\0';
 
-		// printf(".........%d\n", i);
+		// storing suffix one and suffix two
 		strcpy(suffixOne, copyFromGivenIndex(temp, (int)strlen(temp), i));
 		strcpy(suffixTwo, copyFromGivenIndex(word, (int)strlen(word), i));
-		// printf("...%s...%s...%s...%s...%d\n", word, commonPrefix, suffixOne, suffixTwo, i);
+
 
 		strcpy(traveler -> label[*word-'a'], commonPrefix); // truncate the existing word
 		TrieNode* tempNode = traveler -> character[*word-'a']; // to move children
@@ -116,9 +117,9 @@ void insertWord(TrieNode* head, char* word){
 		traveler -> character[*word-'a'] = createNode();
 
 		(traveler -> character[*word-'a'] -> character[*suffixOne - 'a']) = tempNode; // moving children
-		strcpy(traveler -> character[*word-'a'] -> label[*suffixOne - 'a'], suffixOne);  
+		strcpy(traveler -> character[*word-'a'] -> label[*suffixOne - 'a'], suffixOne);  // update the string in child node
 
-		insertWord(traveler -> character[*word-'a'], suffixTwo);
+		insertWord(traveler -> character[*word-'a'], suffixTwo); // insert the remaining suffix
 		return;
 	}
 }
@@ -143,18 +144,15 @@ void printNode(TrieNode* node, char* restOfWord, int pos){
 	// then call the function recursively
 	for(int i=0; i<CHAR_SET; i++){
 		if(node->character[i] != NULL){
-			// restOfWord[pos] = i+'a';
-			// printNode(node -> character[i], restOfWord, pos+1);
 
-			// restOfWord[pos] = i+'a';
 			char temp[SIZE_OF_SINGLE_WORD];
-			strcpy(temp, node -> label[i]);
+			strcpy(temp, node -> label[i]); // copy the string in the node
 			int iter = pos;
 			for(int j=0; temp[j] != '\0'; j++){
-				restOfWord[iter++] = temp[j];
+				restOfWord[iter++] = temp[j]; // updating the rest of word
 			}
 
-			printNode(node -> character[i], restOfWord, pos+(int)strlen(temp));
+			printNode(node -> character[i], restOfWord, pos+(int)strlen(temp)); // printing the childs
 		} 
 	}
 }
@@ -162,7 +160,6 @@ void printNode(TrieNode* node, char* restOfWord, int pos){
 // priting suggestions for a given part of a word
 void printSuggestions(TrieNode* head, char* wordPart, char* concatPart, int concatenate){
 	
-	// head is null when tree does not exist
 	if(head == NULL) {
 		printf("No words found....\n");
 		return;
@@ -173,13 +170,15 @@ void printSuggestions(TrieNode* head, char* wordPart, char* concatPart, int conc
 
 	char temp[SIZE_OF_SINGLE_WORD];
 	strcpy(temp, traveler -> label[*wordPart - 'a']);
-	// printf(".........%s\n", temp);
+	
+	// comparing how much characters are equal between words
 	int i=0;
 	while(temp[i] != '\0' && wordPart[i] != '\0'){
 		if(temp[i] == wordPart[i]) i++;
 		else break;
 	}
 
+	// if the provided word is equal to the word in the node
 	if((int)strlen(wordPart) <= (i) && (int)strlen(temp) <= (i)){
 		goto print;
 	}
@@ -297,7 +296,7 @@ int main(){
 		wordList[i] = malloc(SIZE_OF_SINGLE_WORD*sizeof(char));
 	}
 
-	char* filePath = "./wordlist/wordlist10000.txt"; // this path not work in windows
+	char* filePath = "./wordlist/wordlist70000.txt"; // this path not work in windows
 	// char* filePath = "./wordlist/test.txt"; // this path not work in windows
 	readFile(filePath, wordList);
 
@@ -306,9 +305,9 @@ int main(){
 		// printf("%s\n", wordList[i]);
 	}
     
-
-	// print the whole dictionary 
 	char empty[100];
+
+	// print the whole dictionary 	
 	// printNode(head, empty, 0);
 
 	char userInput[SIZE_OF_SINGLE_WORD];
