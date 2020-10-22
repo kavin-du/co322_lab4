@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h> // for strcat()
 #include <ctype.h> // for tolowercase()
+#include <time.h> // measure execution time
 
 #define CHAR_SET 26 // size of the alphabet
 #define SIZE_OF_SINGLE_WORD 35
@@ -218,9 +219,15 @@ int main(){
 	
 	readFile(filePath, wordList);
 
+	clock_t start = clock(); // start time
+
 	for(int i=0; i<WORDS_IN_FILE; i++){
 		insertWord(head, wordList[i]); // insert words to the trie
 	}
+
+	clock_t end = clock(); // end time
+
+	double time_taken = (double)(end-start)*1000/CLOCKS_PER_SEC;
 
 	/* print the whole dictionary, un-comment both lines */
 
@@ -230,7 +237,8 @@ int main(){
 	char userInput[SIZE_OF_SINGLE_WORD]; // store the user input
 
 	printf("...Trie data structure... \n");
-	
+	printf("Time taken to store the dictionary: %d ms\n\n", (int)time_taken);
+
 	printf("Enter some text to find: ");
 	scanf("%[^\n]%*c", userInput); // getting user input
 
@@ -239,5 +247,13 @@ int main(){
 
 	printf(":::::finding:::::\n\n");
 
+	start = clock(); // start time of search
+
 	printSuggestions(head, userInput); // printing the suggestions for a given word
+
+	end = clock(); // ending time of search
+
+	time_taken = (double)(end-start)*1000/CLOCKS_PER_SEC;
+
+	printf("\nTime taken to search: %f ms\n", time_taken);
 }

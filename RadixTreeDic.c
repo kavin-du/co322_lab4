@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h> // for strcat()
 #include <ctype.h> // for tolowercase()
+#include <time.h> // to measure execution time
 
 #define CHAR_SET 26  // size of the alphabet
 #define SIZE_OF_SINGLE_WORD 35 
@@ -302,10 +303,16 @@ int main(){
 	
 	readFile(filePath, wordList);
 
+	clock_t start = clock(); // start time
+
 	for(int i=0; i<WORDS_IN_FILE; i++){
 		insertWord(head, wordList[i]); // insert words to the trie
 	}
     
+	clock_t end = clock(); // end time
+
+	double time_taken = (double)(end-start)*1000/CLOCKS_PER_SEC;
+
 	char empty[100]; // empty char array to pass strings of parent nodes
 
 	/* print the whole dictionary */
@@ -315,14 +322,24 @@ int main(){
 	char userInput[SIZE_OF_SINGLE_WORD]; // store the user input
 
 	printf("...Compressed trie data structure... \n");
+	
+	printf("Time taken to store the dictionary: %d ms\n\n", (int)time_taken);
 
 	printf("Enter some text to find: ");
 	scanf("%[^\n]%*c", userInput); // taking user input
-
-	toLowerCase(userInput); // convert to lower case
+	
 	sanitize(userInput); // remove non-alphabetic characters
+	toLowerCase(userInput); // convert to lower case
 
 	printf(":::::finding:::::\n\n");
 
+	start = clock();
+
 	printSuggestions(head, userInput, empty, 0); // printing the suggestions for a given word
+
+	end = clock(); // ending time of search
+
+	time_taken = (double)(end-start)*1000/CLOCKS_PER_SEC;
+
+	printf("\nTime taken to search: %f ms\n", time_taken);
 }
