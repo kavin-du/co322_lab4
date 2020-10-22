@@ -63,28 +63,27 @@ void insertWord(TrieNode* head, char* word){
 		else break;
 	}
 	// printf(".........%d\n", i);
-	i--;
+	// i--;
 	// word exists but not marked as a word
-	if((int)strlen(word) == (i+1) && (int)strlen(temp) == (i+1) && ((traveler -> character[*word-'a'] -> isWord)) == 0){
+	if((int)strlen(word) == (i) && (int)strlen(temp) == (i) && ((traveler -> character[*word-'a'] -> isWord)) == 0){
 		(traveler -> character[*word-'a'] -> isWord) = 1; // mark as a word
 		return;
 	}
 
 	// have 'do' -> insert 'doing'
-	if((int)strlen(word) > (i+1) && (int)strlen(temp) == (i+1)) {
+	if((int)strlen(word) > (i) && (int)strlen(temp) == (i)) {
 		char wordPart[SIZE_OF_SINGLE_WORD]; // try to reduce size
-		strcpy(wordPart, copyFromGivenIndex(word, (int)strlen(word), i+1));
+		strcpy(wordPart, copyFromGivenIndex(word, (int)strlen(word), i));
 		// printf(".........%s\n", wordPart);
 		insertWord(traveler -> character[*word-'a'], wordPart);
 		return; 
 	}
 
-	// insert face --> when facebook is there
-	if((int)strlen(word) == (i+1) && (int)strlen(temp) > (i+1)) { // what if marked as word?????????
+	// have 'facebook' --> insert 'face'
+	if((int)strlen(word) == (i) && (int)strlen(temp) > (i)) { // what if marked as word?????????
 		char wordPart[SIZE_OF_SINGLE_WORD];
-		strcpy(wordPart, copyFromGivenIndex(temp, (int)strlen(temp), i+1));
+		strcpy(wordPart, copyFromGivenIndex(temp, (int)strlen(temp), i));
 		strcpy(traveler -> label[*word-'a'], word); // truncate the existing word
-		//traveler -> character[*word-'a'] -> isWord = 1; // mark as a word
 
 		TrieNode* tempNode = traveler -> character[*word-'a'];
 
@@ -97,6 +96,32 @@ void insertWord(TrieNode* head, char* word){
 		return;
 	}
 
+	// have 'there' -> insert 'this'
+	if((int)strlen(word) > (i) && (int)strlen(temp) > (i)) {
+		char commonPrefix[SIZE_OF_SINGLE_WORD];
+		char suffixOne[SIZE_OF_SINGLE_WORD]; // suffix of the internal node
+		char suffixTwo[SIZE_OF_SINGLE_WORD]; // suffix of inserting word
+
+		strncpy(commonPrefix, word, i);
+		commonPrefix[i] = '\0';
+
+		// printf(".........%d\n", i);
+		strcpy(suffixOne, copyFromGivenIndex(temp, (int)strlen(temp), i));
+		strcpy(suffixTwo, copyFromGivenIndex(word, (int)strlen(word), i));
+		// printf("...%s...%s...%s...%s...%d\n", word, commonPrefix, suffixOne, suffixTwo, i);
+
+		strcpy(traveler -> label[*word-'a'], commonPrefix); // truncate the existing word
+		TrieNode* tempNode = traveler -> character[*word-'a']; // to move children
+
+		traveler -> character[*word-'a'] = createNode();
+
+		(traveler -> character[*word-'a'] -> character[*suffixOne - 'a']) = tempNode; // moving children
+		strcpy(traveler -> character[*word-'a'] -> label[*suffixOne - 'a'], suffixOne);  
+
+		insertWord(traveler -> character[*word-'a'], suffixTwo);
+		return;
+
+	}
 
 
 
@@ -133,6 +158,7 @@ int haveChildren(TrieNode* node){
 
 // this function can check if a given word is exist in the trie
 // It was implemented for dubugging purposes
+/*
 int searchWord(TrieNode* head, char* word){
 	// if the tree is not exist, return
 	if(head == NULL) return 0;
@@ -153,56 +179,7 @@ int searchWord(TrieNode* head, char* word){
 	// came to the end character, check if the node is marked as a word
 	return traverler->isWord;
 }
-
-// priting suggestions for a given part of a word
-void printSuggestions(TrieNode* head, char* wordPart){
-	
-	// head is null when tree does not exist
-	if(head == NULL) {
-		printf("Tree is empty.\n");
-		return;
-	}
-	
-	// assigning head node to temporary node
-	TrieNode* traveler = head;
-
-	// saving original word, because we incrementing the pointer
-	char* originalWord = wordPart;
-
-	while(*wordPart){
-
-		// if the character not exist in the trie, there is no word matching
-		if(traveler->character[*wordPart-'a'] == NULL){
-			printf("No words found!!\n");
-			return;
-		}
-		
-		// move to next node
-		traveler = traveler->character[*wordPart-'a'];
-		
-		// move to next character
-		wordPart++;
-	}
-
-	// checking if the last node has at least one child exist,
-	// if threre is one child exist, it is not empty
-	int isEmpty = 1;
-	for(int i=0; i<CHAR_SET; i++){
-		if(traveler->character[i] != NULL){
-			isEmpty = 0;
-			break;
-		}
-	}
-
-	char empty[100];
-	if(isEmpty) printf("%s\n", originalWord); // if the last node is empty, the given word is the matching word
-	else{
-		strcpy(empty, originalWord); // copying orignal word to pass to the function
-		int stringlength = strlen(empty); // length of the orignal word
-		printNode(traveler, empty, stringlength); // print the child nodes of the last node
-	} 
-	
-}
+*/
 
 // printing all the childs as seperate words for a given node
 // Not necessary to be the head node
@@ -239,6 +216,98 @@ void printNode(TrieNode* node, char* restOfWord, int pos){
 	}
 }
 
+// priting suggestions for a given part of a word
+void printSuggestions(TrieNode* head, char* wordPart, char* concatPart, int concatenate){
+	
+	// head is null when tree does not exist
+	if(head == NULL) {
+		printf("Tree is empty.\n");
+		return;
+	}
+	
+	// assigning head node to temporary node
+	TrieNode* traveler = head;
+
+	// saving original word, because we incrementing the pointer
+	// char* originalWord = wordPart;
+
+	/*
+	while(*wordPart){
+
+		// if the character not exist in the trie, there is no word matching
+		if(traveler->character[*wordPart-'a'] == NULL){
+			printf("No words found!!\n");
+			return;
+		}
+		
+		// move to next node
+		traveler = traveler->character[*wordPart-'a'];
+		
+		// move to next character
+		wordPart++;
+	}*/
+
+	char temp[SIZE_OF_SINGLE_WORD];
+	strcpy(temp, traveler -> label[*wordPart - 'a']);
+	// printf(".........%s\n", temp);
+	int i=0;
+	while(temp[i] != '\0' && wordPart[i] != '\0'){
+		if(temp[i] == wordPart[i]) i++;
+		else break;
+	}
+
+	if((int)strlen(wordPart) <= (i) && (int)strlen(temp) == (i)){
+		goto print;
+	}
+
+	if((int)strlen(wordPart) > (i) && (int)strlen(temp) == (i)) {
+		char tempwordPart[SIZE_OF_SINGLE_WORD]; // unmatched string part to be passed to next call
+		strcpy(tempwordPart, copyFromGivenIndex(wordPart, (int)strlen(wordPart), i));
+
+		char concatPartNew[SIZE_OF_SINGLE_WORD]; // passed the matched part of the string
+		strcpy(concatPartNew, concatPart);
+		strncat(concatPartNew, wordPart, i);
+		concatPartNew[(int)strlen(concatPart) + i] = '\0';
+
+		printf("...%s....%s...%d\n",wordPart, tempwordPart, i);
+		printSuggestions(traveler->character[*wordPart - 'a'], tempwordPart, concatPartNew, 1);
+		return;
+	}
+
+
+
+print: ;
+	// checking if the last node has at least one child exist,
+	// if threre is one child exist, it is not empty
+	int isEmpty = 1;
+	for(int i=0; i<CHAR_SET; i++){
+		if(traveler->character[i] != NULL){
+			isEmpty = 0;
+			break;
+		}
+	}
+
+	char empty[100];
+	if(isEmpty) printf("%s\n", wordPart); // if the last node is empty, the given word is the matching word
+	else{
+		if(concatenate){
+			strcpy(empty, concatPart);
+			// strcat(empty, wordPart);
+			strcat(empty, traveler->label[*wordPart - 'a']);
+			printf("concat......%s...%s\n", concatPart, wordPart);
+		} else {
+			strcpy(empty, wordPart);
+			printf("not_concat......%s\n", empty);
+		}
+		 
+		int stringlength = strlen(empty); // length of the orignal word
+		printNode(traveler->character[*wordPart - 'a'], empty, stringlength); // print the child nodes of the last node
+	} 
+	
+}
+
+
+
 // function for reading the text file
 void readFile(char* path, char** array){
 	FILE* file;
@@ -273,9 +342,9 @@ int main(){
 	
 	TrieNode* head = createNode();
 	
-	char words[][10] = {"hello", "who", "are", "helloww", "you"};
+	char words[][20] = {"for", "do", "while", "doing", "facebook", "face", "thereafter", "therein", "this"};
 
-	for(int i=0; i<5; i++){
+	for(int i=0; i<9; i++){
 		insertWord(head, words[i]);
 	}
 
@@ -299,10 +368,10 @@ int main(){
 
 	// print the whole dictionary 
 	char empty[100];
-	printNode(head, empty, 0);
+	// printNode(head, empty, 0);
 
-	// char* w = "who"; // need lowercase? 
+	char* w = "the"; // need lowercase? 
 	// printf("%s\n", searchWord(head, w) ? "found" : "not found");
 
-	//printSuggestions(head, w); // printing the suggestions for a given word
+	printSuggestions(head, w, empty, 0); // printing the suggestions for a given word
 }
