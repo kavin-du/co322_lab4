@@ -5,7 +5,21 @@
 
 #define CHAR_SET 26  // size of the alphabet
 #define SIZE_OF_SINGLE_WORD 35 
-#define WORDS_IN_FILE 69903 // need to change this
+#define WORDS_IN_FILE 69903 // need to change this if the file name is changed
+
+/**
+ * CO322 LAB 04 Part II
+ * 
+ * Radix-tree data structure for text auto-complete
+ * 
+ * E/16/057 - Chamith UKDK
+ * 
+ * 22/10/2020
+ * 
+ * Creted and tested on a linux environment - Ubuntu 20.04
+ * 
+ */
+
 
 typedef struct trienode{ 
 	int isWord; // to determine if the node is endpoint of a word
@@ -168,6 +182,7 @@ void printSuggestions(TrieNode* head, char* wordPart, char* concatPart, int conc
 	// assigning head node to temporary node
 	TrieNode* traveler = head;
 
+	// store the string in the node
 	char temp[SIZE_OF_SINGLE_WORD];
 	strcpy(temp, traveler -> label[*wordPart - 'a']);
 	
@@ -178,59 +193,52 @@ void printSuggestions(TrieNode* head, char* wordPart, char* concatPart, int conc
 		else break;
 	}
 
-	// if the provided word is equal to the word in the node
-	if((int)strlen(wordPart) <= (i) && (int)strlen(temp) <= (i)){
-		goto print;
-	}
-
+	// if the provided string length is larger than word in the node
 	if((int)strlen(wordPart) > (i) && (int)strlen(temp) == (i)) {
 		char tempwordPart[SIZE_OF_SINGLE_WORD]; // unmatched string part to be passed to next call
 		strcpy(tempwordPart, copyFromGivenIndex(wordPart, (int)strlen(wordPart), i));
 
-		char concatPartNew[SIZE_OF_SINGLE_WORD]; // passed the matched part of the string
-		strcpy(concatPartNew, concatPart);
-		strncat(concatPartNew, wordPart, i);
-		concatPartNew[(int)strlen(concatPart) + i] = '\0';
+		char concatPartNew[SIZE_OF_SINGLE_WORD]; // to pass the matched part of the string
+		strcpy(concatPartNew, concatPart); // copy the provided prefix
+		strncat(concatPartNew, wordPart, i); // copy the matched part
+		concatPartNew[(int)strlen(concatPart) + i] = '\0'; // add null terminator
 
-		// printf("...%s....%s...%d\n",wordPart, tempwordPart, i);
+		// passed to child nodes and print
 		printSuggestions(traveler->character[*wordPart - 'a'], tempwordPart, concatPartNew, 1);
-		return;
-	}
 
-	if((int)strlen(wordPart) > (i) && (int)strlen(temp) > (i)){
-		printf("No words found..!\n");
-		return;
-	}
-	
-	// printf("testing..=...=...=.......=....=...=....=..=...=..=....\n"); // cannot come here
+	} else if((int)strlen(wordPart) > (i) && (int)strlen(temp) > (i)){
 
-print: ;
-	// checking if the last node has at least one child exist,
-	// if threre is one child exist, it is not empty
-	int isEmpty = 1;
-	for(int i=0; i<CHAR_SET; i++){
-		if(traveler->character[i] != NULL){
-			isEmpty = 0;
-			break;
+		printf("No words found..!\n"); // if there are unmatched characters left
+
+	} else if((int)strlen(wordPart) <= (i) && (int)strlen(temp) <= (i)) { // match found
+
+		// checking if the last node has at least one child exist,
+		// if threre is one child exist, it is not empty
+		int isEmpty = 1;
+		for(int i=0; i<CHAR_SET; i++){
+			if(traveler->character[i] != NULL){
+				isEmpty = 0;
+				break;
+			}
 		}
-	}
 
-	char empty[100];
-	if(isEmpty) printf("%s\n", wordPart); // if the last node is empty, the given word is the matching word
-	else{
-		if(concatenate){
-			strcpy(empty, concatPart);
-			// strcat(empty, wordPart);
-			strcat(empty, traveler->label[*wordPart - 'a']);
-			// printf("concat......%s...%s\n", concatPart, wordPart);
-		} else {
-			strcpy(empty, wordPart);
-			// printf("not_concat......%s\n", empty);
-		}
-		 
-		int stringlength = strlen(empty); // length of the orignal word
-		printNode(traveler->character[*wordPart - 'a'], empty, stringlength); // print the child nodes of the last node
-	} 
+		char empty[100]; // to passed for the child nodes
+
+		if(isEmpty) printf("%s\n", wordPart); // if the last node is empty, the given word is the matching word
+		else{
+			if(concatenate){ // if the concatenate signal enabled, concatenate parent strings 
+
+				strcpy(empty, concatPart);
+				strcat(empty, traveler->label[*wordPart - 'a']);
+				
+			} else {
+				strcpy(empty, wordPart);
+			}
+			
+			int stringlength = strlen(empty); // length of the orignal word
+			printNode(traveler->character[*wordPart - 'a'], empty, stringlength); // print the child nodes of the last node
+		} 
+	}
 	
 }
 
@@ -251,7 +259,7 @@ void readFile(char* path, char** array){
 		char* token;
 		token = strtok(word, "\n"); // removing new line characters from the word
 		char temp[SIZE_OF_SINGLE_WORD];
-		strcpy(temp, token); // copy the sanitized word to new word
+		strcpy(temp, token); // copy the '\n' removed word to new word
 		toLowerCase(temp); // convert to lowercase
 		sanitize(temp); // remove non-alphabetic characters
 		strcpy(array[i], temp); // store in the array in the main function
@@ -267,7 +275,7 @@ void toLowerCase(char* word){
     }
 }
 
-// remove non-alphabetic charaters from a word
+// function remove non-alphabetic charaters from a word
 void sanitize(char* word){
     char temp[SIZE_OF_SINGLE_WORD];
     int j=0;
@@ -281,14 +289,6 @@ void sanitize(char* word){
 int main(){
 	
 	TrieNode* head = createNode();
-	
-	// char words[][20] = {"for", "do", "while", "doing", "facebook", "face", "thereafter", "therein", "this"};
-
-	// for(int i=0; i<9; i++){
-	// 	insertWord(head, words[i]);
-	// }
-
-    
 
 	// dynamically allocated array of char pointers to store the words from file
 	char** wordList = malloc(WORDS_IN_FILE*sizeof(char*));
@@ -296,26 +296,31 @@ int main(){
 		wordList[i] = malloc(SIZE_OF_SINGLE_WORD*sizeof(char));
 	}
 
-	char* filePath = "./wordlist/wordlist70000.txt"; // this path not work in windows
-	// char* filePath = "./wordlist/test.txt"; // this path not work in windows
+	char* filePath = "./wordlist/wordlist70000.txt"; // paths for text files, un-comment only one at a time
+	// char* filePath = "./wordlist/wordlist10000.txt";
+	// char* filePath = "./wordlist/wordlist1000.txt";
+	
 	readFile(filePath, wordList);
 
 	for(int i=0; i<WORDS_IN_FILE; i++){
 		insertWord(head, wordList[i]); // insert words to the trie
-		// printf("%s\n", wordList[i]);
 	}
     
-	char empty[100];
+	char empty[100]; // empty char array to pass strings of parent nodes
 
-	// print the whole dictionary 	
+	/* print the whole dictionary */
+
 	// printNode(head, empty, 0);
 
-	char userInput[SIZE_OF_SINGLE_WORD];
+	char userInput[SIZE_OF_SINGLE_WORD]; // store the user input
 
-	printf("Compressed trie data structure.. \n");
+	printf("...Compressed trie data structure... \n");
+
 	printf("Enter some text to find: ");
-	scanf("%[^\n]%*c", userInput);
-	sanitize(userInput);
+	scanf("%[^\n]%*c", userInput); // taking user input
+
+	toLowerCase(userInput); // convert to lower case
+	sanitize(userInput); // remove non-alphabetic characters
 
 	printf(":::::finding:::::\n\n");
 

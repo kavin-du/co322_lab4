@@ -212,7 +212,7 @@ int main(){
 		wordList[i] = malloc(SIZE_OF_SINGLE_WORD*sizeof(char));
 	}
 
-	char* filePath = "./wordlist/wordlist70000.txt"; // path of the text file
+	char* filePath = "./wordlist/wordlist70000.txt"; // paths of the text file, un-comment only one at a time
 	// char* filePath = "./wordlist/wordlist10000.txt";
 	// char* filePath = "./wordlist/wordlist1000.txt";
 	
@@ -223,14 +223,18 @@ int main(){
 	}
 
 	/* print the whole dictionary, un-comment both lines */
-	// char empty[100];
+
+	// char empty[100]; // empty char array to pass strings of parent nodes
 	// printNode(head, empty, 0);
 
-	char userInput[SIZE_OF_SINGLE_WORD];
+	char userInput[SIZE_OF_SINGLE_WORD]; // store the user input
 
-	printf("Trie data structure.. \n");
+	printf("...Trie data structure... \n");
+	
 	printf("Enter some text to find: ");
 	scanf("%[^\n]%*c", userInput); // getting user input
+
+	toLowerCase(userInput); // convert to lower case
 	sanitize(userInput); // removing non-alphabetic characters
 
 	printf(":::::finding:::::\n\n");
