@@ -4,8 +4,8 @@
 #include <ctype.h> // for tolowercase()
 
 // size of the alphabet
-#define CHAR_SET 27  // there are non aphabetical characters in the text file
-#define SIZE_OF_SINGLE_WORD 25 // 25
+#define CHAR_SET 26  // there are non aphabetical characters in the text file
+#define SIZE_OF_SINGLE_WORD 35 
 #define WORDS_IN_FILE 10000 // need to change this if the file name is changed
 
 
@@ -120,66 +120,9 @@ void insertWord(TrieNode* head, char* word){
 
 		insertWord(traveler -> character[*word-'a'], suffixTwo);
 		return;
-
 	}
-
-
-
-	/*while(*word){
-		// if the target node is null, assign a new node
-		if(traveler->character[*word -'a'] == NULL){
-			traveler->character[*word -'a'] = createNode();
-		}
-		
-		// move to next node
-		traveler = traveler->character[*word-'a'];
-		
-		// move to next characer
-		word++;
-	}
-	// mark last node as a word
-	traveler->isWord = 1;
-	*/
-
 }
 
-// not used
-/*
-int haveChildren(TrieNode* node){
-	for(int i=0; i<CHAR_SET; i++){
-		if((node -> character[i]) != NULL){
-			return 1; // have at least 1 child
-		}
-	}
-	return 0; // no children
-}*/
-
-
-
-// this function can check if a given word is exist in the trie
-// It was implemented for dubugging purposes
-/*
-int searchWord(TrieNode* head, char* word){
-	// if the tree is not exist, return
-	if(head == NULL) return 0;
-
-	// assign head node to temporary node
-	TrieNode* traverler = head;
-
-	while(*word){
-		// move to next node
-		traverler = traverler->character[*word-'a'];
-
-		// if the current node is empty, there is no word
-		if(traverler == NULL) return 0;
-
-		// move to next character
-		word++;
-	}
-	// came to the end character, check if the node is marked as a word
-	return traverler->isWord;
-}
-*/
 
 // printing all the childs as seperate words for a given node
 // Not necessary to be the head node
@@ -221,31 +164,12 @@ void printSuggestions(TrieNode* head, char* wordPart, char* concatPart, int conc
 	
 	// head is null when tree does not exist
 	if(head == NULL) {
-		printf("Tree is empty.\n");
+		printf("No words found....\n");
 		return;
 	}
 	
 	// assigning head node to temporary node
 	TrieNode* traveler = head;
-
-	// saving original word, because we incrementing the pointer
-	// char* originalWord = wordPart;
-
-	/*
-	while(*wordPart){
-
-		// if the character not exist in the trie, there is no word matching
-		if(traveler->character[*wordPart-'a'] == NULL){
-			printf("No words found!!\n");
-			return;
-		}
-		
-		// move to next node
-		traveler = traveler->character[*wordPart-'a'];
-		
-		// move to next character
-		wordPart++;
-	}*/
 
 	char temp[SIZE_OF_SINGLE_WORD];
 	strcpy(temp, traveler -> label[*wordPart - 'a']);
@@ -256,7 +180,7 @@ void printSuggestions(TrieNode* head, char* wordPart, char* concatPart, int conc
 		else break;
 	}
 
-	if((int)strlen(wordPart) <= (i) && (int)strlen(temp) == (i)){
+	if((int)strlen(wordPart) <= (i) && (int)strlen(temp) <= (i)){
 		goto print;
 	}
 
@@ -269,12 +193,17 @@ void printSuggestions(TrieNode* head, char* wordPart, char* concatPart, int conc
 		strncat(concatPartNew, wordPart, i);
 		concatPartNew[(int)strlen(concatPart) + i] = '\0';
 
-		printf("...%s....%s...%d\n",wordPart, tempwordPart, i);
+		// printf("...%s....%s...%d\n",wordPart, tempwordPart, i);
 		printSuggestions(traveler->character[*wordPart - 'a'], tempwordPart, concatPartNew, 1);
 		return;
 	}
 
-
+	if((int)strlen(wordPart) > (i) && (int)strlen(temp) > (i)){
+		printf("No words found..!\n");
+		return;
+	}
+	
+	// printf("testing..=...=...=.......=....=...=....=..=...=..=....\n"); // cannot come here
 
 print: ;
 	// checking if the last node has at least one child exist,
@@ -294,10 +223,10 @@ print: ;
 			strcpy(empty, concatPart);
 			// strcat(empty, wordPart);
 			strcat(empty, traveler->label[*wordPart - 'a']);
-			printf("concat......%s...%s\n", concatPart, wordPart);
+			// printf("concat......%s...%s\n", concatPart, wordPart);
 		} else {
 			strcpy(empty, wordPart);
-			printf("not_concat......%s\n", empty);
+			// printf("not_concat......%s\n", empty);
 		}
 		 
 		int stringlength = strlen(empty); // length of the orignal word
@@ -325,6 +254,7 @@ void readFile(char* path, char** array){
 		char temp[SIZE_OF_SINGLE_WORD];
 		strcpy(temp, token); // copy the sanitized word to new word
 		toLowerCase(temp); // convert to lowercase
+		sanitize(temp); // remove non-alphabetic characters
 		strcpy(array[i], temp); // store in the array in the main function
 		i++;
 	}
@@ -338,17 +268,28 @@ void toLowerCase(char* word){
     }
 }
 
+// remove non-alphabetic charaters from a word
+void sanitize(char* word){
+    char temp[SIZE_OF_SINGLE_WORD];
+    int j=0;
+    for(int i=0; i<strlen(word); i++){
+        if(isalpha(word[i])){
+            temp[j++] = word[i];
+        }
+    }
+    strcpy(word, temp);
+}
 int main(){
 	
 	TrieNode* head = createNode();
 	
-	char words[][20] = {"for", "do", "while", "doing", "facebook", "face", "thereafter", "therein", "this"};
+	// char words[][20] = {"for", "do", "while", "doing", "facebook", "face", "thereafter", "therein", "this"};
 
-	for(int i=0; i<9; i++){
-		insertWord(head, words[i]);
-	}
+	// for(int i=0; i<9; i++){
+	// 	insertWord(head, words[i]);
+	// }
 
-    /*
+    
 
 	// dynamically allocated array of char pointers to store the words from file
 	char** wordList = malloc(WORDS_IN_FILE*sizeof(char*));
@@ -364,14 +305,20 @@ int main(){
 		insertWord(head, wordList[i]); // insert words to the trie
 		// printf("%s\n", wordList[i]);
 	}
-    */
+    
 
 	// print the whole dictionary 
 	char empty[100];
 	// printNode(head, empty, 0);
 
-	char* w = "the"; // need lowercase? 
-	// printf("%s\n", searchWord(head, w) ? "found" : "not found");
+	char userInput[SIZE_OF_SINGLE_WORD];
 
-	printSuggestions(head, w, empty, 0); // printing the suggestions for a given word
+	printf("Compressed trie data structure.. \n");
+	printf("Enter some text to find: ");
+	scanf("%[^\n]%*c", userInput);
+	sanitize(userInput);
+
+	printf(":::::finding:::::\n\n");
+
+	printSuggestions(head, userInput, empty, 0); // printing the suggestions for a given word
 }

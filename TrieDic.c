@@ -4,9 +4,9 @@
 #include <ctype.h> // for tolowercase()
 
 // size of the alphabet
-#define CHAR_SET 27  // there are non aphabetical characters in the text file
-#define SIZE_OF_SINGLE_WORD 25 // 25
-#define WORDS_IN_FILE 10000 // need to change this if the file name is changed
+#define CHAR_SET 26  // there are non aphabetical characters in the text file
+#define SIZE_OF_SINGLE_WORD 35 
+#define WORDS_IN_FILE 69904 // need to change this if the file name is changed
 
 
 typedef struct trienode{ 
@@ -78,7 +78,7 @@ void printSuggestions(TrieNode* head, char* wordPart){
 	
 	// head is null when tree does not exist
 	if(head == NULL) {
-		printf("Tree is empty.\n");
+		printf("No words found....\n");
 		return;
 	}
 	
@@ -165,6 +165,7 @@ void readFile(char* path, char** array){
 		char temp[SIZE_OF_SINGLE_WORD];
 		strcpy(temp, token); // copy the sanitized word to new word
 		toLowerCase(temp); // convert to lowercase
+		sanitize(temp); // remove non-alphabetic characters
 		strcpy(array[i], temp); // store in the array in the main function
 		i++;
 	}
@@ -176,6 +177,18 @@ void toLowerCase(char* word){
     for(int i=0; word[i] != '\0'; i++){
         word[i] = tolower(word[i]);
     }
+}
+
+// remove non-alphabetic charaters from a word
+void sanitize(char* word){
+    char temp[SIZE_OF_SINGLE_WORD];
+    int j=0;
+    for(int i=0; i<strlen(word); i++){
+        if(isalpha(word[i])){
+            temp[j++] = word[i];
+        }
+    }
+    strcpy(word, temp);
 }
 
 int main(){
@@ -197,7 +210,7 @@ int main(){
 		wordList[i] = malloc(SIZE_OF_SINGLE_WORD*sizeof(char));
 	}
 
-	char* filePath = "./wordlist/wordlist10000.txt"; // this path not work in windows
+	char* filePath = "./wordlist/wordlist70000.txt"; // this path not work in windows
 	// char* filePath = "./wordlist/test.txt"; // this path not work in windows
 	readFile(filePath, wordList);
 
@@ -210,7 +223,15 @@ int main(){
 	// char empty[100];
 	// printNode(head, empty, 0);
 
-	char* w = "fuc"; // need lowercase? 
+	char userInput[SIZE_OF_SINGLE_WORD];
+
+	printf("Trie data structure.. \n");
+	printf("Enter some text to find: ");
+	scanf("%[^\n]%*c", userInput);
+	sanitize(userInput);
+
+	printf(":::::finding:::::\n\n");
+
 	// printf("%s\n", searchWord(head, w) ? "found" : "not found");
-	printSuggestions(head, w); // printing the suggestions for a given word
+	printSuggestions(head, userInput); // printing the suggestions for a given word
 }
