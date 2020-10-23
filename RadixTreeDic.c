@@ -243,7 +243,24 @@ void printSuggestions(TrieNode* head, char* wordPart, char* concatPart, int conc
 	
 }
 
+// function for converting a given word into lowercase
+void toLowerCase(char* word){
+    for(int i=0; word[i] != '\0'; i++){
+        word[i] = tolower(word[i]);
+    }
+}
 
+// function remove non-alphabetic charaters from a word
+void sanitize(char* word){
+    char temp[SIZE_OF_SINGLE_WORD];
+    int j=0;
+    for(int i=0; i<strlen(word); i++){
+        if(isalpha(word[i])){
+            temp[j++] = word[i];
+        }
+    }
+    strcpy(word, temp);
+}
 
 // function for reading the text file
 void readFile(char* path, char** array){
@@ -269,24 +286,7 @@ void readFile(char* path, char** array){
 	fclose(file); // close the file
 }
 
-// function for converting a given word into lowercase
-void toLowerCase(char* word){
-    for(int i=0; word[i] != '\0'; i++){
-        word[i] = tolower(word[i]);
-    }
-}
 
-// function remove non-alphabetic charaters from a word
-void sanitize(char* word){
-    char temp[SIZE_OF_SINGLE_WORD];
-    int j=0;
-    for(int i=0; i<strlen(word); i++){
-        if(isalpha(word[i])){
-            temp[j++] = word[i];
-        }
-    }
-    strcpy(word, temp);
-}
 int main(){
 	
 	TrieNode* head = createNode();

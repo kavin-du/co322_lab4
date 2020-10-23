@@ -86,6 +86,31 @@ int searchWord(TrieNode* head, char* word){
 	return traverler->isWord;
 }
 
+// printing all the childs as seperate words for a given node
+// Not necessary to be the head node
+void printNode(TrieNode* node, char* restOfWord, int pos){
+	if(node == NULL) return; // return to caller if the node is null
+
+	// if the node is marked as a word, then print the parent nodes
+	// restOfWord stores the characters of the parent nodes
+	if(node->isWord){
+		for(int i=0; i<pos; i++){
+			printf("%c", restOfWord[i]);
+		}
+		printf("\n");
+	}
+
+	// checking all the child nodes, if they are not null
+	// append the node character to the array and increment array position
+	// then call the function recursively
+	for(int i=0; i<CHAR_SET; i++){
+		if(node->character[i] != NULL){
+			restOfWord[pos] = i+'a';
+			printNode(node -> character[i], restOfWord, pos+1);
+		} 
+	}
+}
+
 // priting suggestions for a given part of a word
 void printSuggestions(TrieNode* head, char* wordPart){
 	
@@ -135,29 +160,23 @@ void printSuggestions(TrieNode* head, char* wordPart){
 	
 }
 
-// printing all the childs as seperate words for a given node
-// Not necessary to be the head node
-void printNode(TrieNode* node, char* restOfWord, int pos){
-	if(node == NULL) return; // return to caller if the node is null
+// function for converting a given word into lowercase
+void toLowerCase(char* word){
+    for(int i=0; word[i] != '\0'; i++){
+        word[i] = tolower(word[i]);
+    }
+}
 
-	// if the node is marked as a word, then print the parent nodes
-	// restOfWord stores the characters of the parent nodes
-	if(node->isWord){
-		for(int i=0; i<pos; i++){
-			printf("%c", restOfWord[i]);
-		}
-		printf("\n");
-	}
-
-	// checking all the child nodes, if they are not null
-	// append the node character to the array and increment array position
-	// then call the function recursively
-	for(int i=0; i<CHAR_SET; i++){
-		if(node->character[i] != NULL){
-			restOfWord[pos] = i+'a';
-			printNode(node -> character[i], restOfWord, pos+1);
-		} 
-	}
+// remove non-alphabetic charaters from a word
+void sanitize(char* word){
+    char temp[SIZE_OF_SINGLE_WORD];
+    int j=0;
+    for(int i=0; i<strlen(word); i++){
+        if(isalpha(word[i])){
+            temp[j++] = word[i];
+        }
+    }
+    strcpy(word, temp);
 }
 
 // function for reading the text file
@@ -184,24 +203,6 @@ void readFile(char* path, char** array){
 	fclose(file); // close the file
 }
 
-// function for converting a given word into lowercase
-void toLowerCase(char* word){
-    for(int i=0; word[i] != '\0'; i++){
-        word[i] = tolower(word[i]);
-    }
-}
-
-// remove non-alphabetic charaters from a word
-void sanitize(char* word){
-    char temp[SIZE_OF_SINGLE_WORD];
-    int j=0;
-    for(int i=0; i<strlen(word); i++){
-        if(isalpha(word[i])){
-            temp[j++] = word[i];
-        }
-    }
-    strcpy(word, temp);
-}
 
 int main(){
 	
