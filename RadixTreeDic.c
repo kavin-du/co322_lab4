@@ -65,7 +65,7 @@ void insertWord(TrieNode* head, char* word){
     if(traveler -> character[*word -'a'] == NULL){
         traveler -> character[*word -'a'] = createNode();
         strcpy(traveler -> label[*word-'a'], word); // copy the whole word
-        traveler -> character[*word -'a'] -> isWord = 1;  // ???? inner node? 
+        traveler -> character[*word -'a'] -> isWord = 1;  // mark as a word
         return;
     }
     
