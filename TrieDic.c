@@ -27,10 +27,12 @@ typedef struct trienode{
 	struct trienode* character[CHAR_SET]; // store the child nodes
 }TrieNode;
 
+int totalNodes = 0; // to count the total nodes created
 
 TrieNode* createNode(){
 	// allocating memory for new node
 	TrieNode* newNode = (TrieNode*)malloc(sizeof(TrieNode));
+	totalNodes++;
 	
 	// making all children null
 	for(int i=0; i<CHAR_SET; i++){
@@ -239,7 +241,7 @@ int main(){
 
 	printf("...Trie data structure... \n");
 	printf("Time taken to store the dictionary: %d ms\n\n", (int)time_taken);
-
+	printf("Total Nodes created: %d\n\n", totalNodes);
 	printf("Enter some text to find: ");
 	scanf("%[^\n]%*c", userInput); // getting user input
 
